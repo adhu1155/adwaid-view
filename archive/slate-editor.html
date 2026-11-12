@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slate — Markdown Editor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js for fast, reliable Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Theme CSS Custom Properties for crisp Light & Dark desktop fidelity */
+    :root {
+      --bg-chrome: #F4F5F7;
+      --bg-surface: #FFFFFF;
+      --bg-hover: #EAECEF;
+      --bg-active-pill: #E5E7EB;
+      --border-hairline: #E5E7EB;
+      --border-strong: #D1D5DB;
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #9CA3AF;
+      --accent: #2563EB;
+      --accent-soft: rgba(37, 99, 235, 0.1);
+      --code-bg: #F8FAFC;
+      --table-stripe: #F9FAFB;
+      --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    html.dark {
+      --bg-chrome: #0F1012;
+      --bg-surface: #16171A;
+      --bg-hover: #1E2025;
+      --bg-active-pill: #262930;
+      --border-hairline: #27292E;
+      --border-strong: #353840;
+      --text-primary: #E5E7EB;
+      --text-secondary: #9CA3AF;
+      --text-muted: #6B7280;
+      --accent: #60A5FA;
+      --accent-soft: rgba(96, 165, 250, 0.14);
+      --code-bg: #111215;
+      --table-stripe: #1B1D21;
+      --shadow-dropdown: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Chrome & Surface Helpers */
+    .chrome-bar {
+      background-color: var(--bg-chrome);
+      border-color: var(--border-hairline);
+    }
+
+    .surface-area {
+      background-color: var(--bg-surface);
+    }
+
+    .hairline-b {
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .hairline-r {
+      border-right: 1px solid var(--border-hairline);
+    }
+
+    .menu-btn {
+      color: var(--text-secondary);
+      border-radius: 5px;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .menu-btn:hover, .menu-btn.active {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* Dropdown Menu */
+    .dropdown-panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      box-shadow: var(--shadow-dropdown);
+      border-radius: 8px;
+      z-index: 50;
+    }
+
+    .dropdown-item {
+      color: var(--text-primary);
+      border-radius: 5px;
+      transition: background-color 0.1s ease;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--bg-hover);
+    }
+
+    /* Browser-Style Tab Strip */
+    .tab-strip {
+      background-color: var(--bg-chrome);
+      border-bottom: 1px solid var(--border-hairline);
+      scrollbar-width: none;
+    }
+
+    .tab-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .browser-tab {
+      position: relative;
+      height: 30px;
+      margin-top: 6px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      border: 1px solid transparent;
+      border-bottom: none;
+      color: var(--text-secondary);
+      background-color: transparent;
+      transition: background-color 0.12s ease, color 0.12s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .browser-tab:hover:not(.active) {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* Seamless connection between active tab and editor canvas below */
+    .browser-tab.active {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-hairline);
+      height: 31px;
+      margin-bottom: -1px;
+      z-index: 10;
+      font-weight: 500;
+    }
+
+    .tab-close-btn {
+      opacity: 0;
+      border-radius: 4px;
+      transition: opacity 0.1s ease, background-color 0.1s ease;
+    }
+
+    .browser-tab:hover .tab-close-btn,
+    .browser-tab.active .tab-close-btn {
+      opacity: 1;
+    }
+
+    .tab-close-btn:hover {
+      background-color: var(--bg-active-pill);
+      color: var(--text-primary);
+    }
+
+    /* Full-Width Raw Markdown Editor */
+    #markdown-editor {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14.5px;
+      line-height: 1.72;
+      color: var(--text-primary);
+      background-color: var(--bg-surface);
+      border: none;
+      outline: none;
+      resize: none;
+      width: 100%;
+      height: 100%;
+      padding: 24px 28px 64px 28px;
+      tab-size: 2;
+      user-select: text;
+    }
+
+    #markdown-editor::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Full-Width Rendered Markdown Preview */
+    .markdown-preview {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px 28px 72px 28px;
+      color: var(--text-primary);
+      font-size: 15.5px;
+      line-height: 1.72;
+      user-select: text;
+      word-wrap: break-word;
+    }
+
+    /* Ensure zero max-width constraints anywhere inside preview so full width is utilized */
+    .markdown-preview > *:first-child {
+      margin-top: 0;
+    }
+
+    .markdown-preview h1 {
+      font-size: 1.95rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+      margin: 1.6rem 0 0.85rem 0;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .markdown-preview h2 {
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin: 1.5rem 0 0.65rem 0;
+    }
+
+    .markdown-preview h3 {
+      font-size: 1.18rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    .markdown-preview p {
+      margin: 0.75rem 0;
+    }
+
+    .markdown-preview a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .markdown-preview ul, .markdown-preview ol {
+      margin: 0.75rem 0;
+      padding-left: 1.65rem;
+    }
+
+    .markdown-preview ul {
+      list-style-type: disc;
+    }
+
+    .markdown-preview ol {
+      list-style-type: decimal;
+    }
+
+    .markdown-preview li {
+      margin: 0.3rem 0;
+    }
+
+    .markdown-preview li input[type="checkbox"] {
+      margin-right: 0.5rem;
+      accent-color: var(--accent);
+      cursor: pointer;
+      transform: translateY(1px);
+    }
+
+    .markdown-preview blockquote {
+      margin: 1rem 0;
+      padding: 0.5rem 1rem;
+      border-left: 3px solid var(--accent);
+      background-color: var(--bg-chrome);
+      color: var(--text-secondary);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .markdown-preview code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-hairline);
+      padding: 0.14em 0.38em;
+      border-radius: 4px;
+    }
+
+    .markdown-preview pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 14px 18px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.55;
+    }
+
+    .markdown-preview pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 13.5px;
+      color: var(--text-primary);
+    }
+
+    /* Full-width tables shine on wide desktop layouts */
+    .markdown-preview table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.15rem 0;
+      font-size: 14px;
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .markdown-preview th, .markdown-preview td {
+      border: 1px solid var(--border-hairline);
+      padding: 9px 14px;
+      text-align: left;
+    }
+
+    .markdown-preview th {
+      background-color: var(--bg-chrome);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .markdown-preview tr:nth-child(even) td {
+      background-color: var(--table-stripe);
+    }
+
+    .markdown-preview hr {
+      border: none;
+      border-top: 1px solid var(--border-hairline);
+      margin: 1.5rem 0;
+    }
+
+    /* Split Pane Resizer */
+    .split-resizer {
+      width: 5px;
+      margin-left: -2px;
+      margin-right: -2px;
+      cursor: col-resize;
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .split-resizer::after {
+      content: '';
+      width: 1px;
+      height: 100%;
+      background-color: var(--border-hairline);
+      transition: background-color 0.15s ease, width 0.15s ease;
+    }
+
+    .split-resizer:hover::after,
+    .split-resizer.dragging::after {
+      width: 2px;
+      background-color: var(--accent);
+    }
+
+    /* Custom subtle scrollbars */
+    textarea::-webkit-scrollbar,
+    .markdown-preview::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    textarea::-webkit-scrollbar-track,
+    .markdown-preview::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    textarea::-webkit-scrollbar-thumb,
+    .markdown-preview::-webkit-scrollbar-thumb {
+      background-color: var(--border-strong);
+      border-radius: 9999px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen flex flex-col overflow-hidden">
+
+  <!-- Hidden file input for opening local .md files -->
+  <input type="file" id="local-file-input" accept=".md,.markdown,.txt,text/markdown,text/plain" class="hidden" />
+
+  <!-- 1. TITLE BAR (32px height) -->
+  <header class="h-[32px] chrome-bar hairline-b px-3 flex items-center justify-between shrink-0">
+    <!-- Left: App Icon & Name -->
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded-[4px] flex items-center justify-center" style="background-color: var(--text-primary); color: var(--bg-surface);">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 4h10M3 8h7M3 12h9" />
+        </svg>
+      </div>
+      <span class="text-[12.5px] font-semibold tracking-tight" style="color: var(--text-primary);">Slate</span>
+      <span id="titlebar-active-file" class="text-[11.5px] hidden sm:inline" style="color: var(--text-muted);">— system-design.md</span>
+    </div>
+
+    <!-- Right: Theme Switcher & Desktop Window Controls -->
+    <div class="flex items-center gap-1">
+      <button id="theme-toggle-btn" title="Toggle Light / Dark Theme" class="menu-btn h-6 px-2 flex items-center gap-1.5 text-[11.5px] font-medium">
+        <svg id="icon-sun" class="hidden w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <svg id="icon-moon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+        <span id="theme-label" class="hidden sm:inline">Dark</span>
+      </button>
+
+      <div class="h-3.5 w-[1px] mx-1" style="background-color: var(--border-hairline);"></div>
+
+      <!-- Subtle PC Window Controls -->
+      <button onclick="showToast('Window minimized to dock')" title="Minimize" class="menu-btn w-7 h-6 flex items-center justify-center">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M2 6h8" />
+        </svg>
+      </button>
+      <button id="fullscreen-btn" title="Toggle Fullscreen" class="menu-btn w-7 h-6 flex items-center justify-center">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="2" y="2" width="8" height="8" rx="1" />
+        </svg>
+      </button>
+      <button onclick="showToast('Slate workspace session active')" title="Close Window" class="menu-btn w-7 h-6 flex items-center justify-center hover:!bg-red-500 hover:!text-white">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. MENU / CONTROL BAR (38px height) -->
+  <nav class="h-[38px] chrome-bar hairline-b px-3 flex items-center justify-between shrink-0 relative">
+    <!-- Left Menu Items: File, New, Mode -->
+    <div class="flex items-center gap-1">
+      <!-- FILE DROPDOWN -->
+      <div class="relative" id="file-menu-wrapper">
+        <button id="file-menu-btn" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1">
+          <span>File</span>
+          <svg class="w-3 h-3 opacity-60" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+
+        <div id="file-dropdown" class="dropdown-panel hidden absolute left-0 top-[32px] w-56 p-1.5 text-[13px]">
+          <button id="menu-open-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Open Local .md File...</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Ctrl+O</span>
+          </button>
+          <button id="menu-save-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Save / Download .md</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Ctrl+S</span>
+          </button>
+          <button id="menu-rename-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Rename Current File</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">F2</span>
+          </button>
+          <div class="my-1 border-t" style="border-color: var(--border-hairline);"></div>
+          <button id="menu-close-tab" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left text-red-500">
+            <span>Close Tab</span>
+            <span class="text-[11px] opacity-75">Ctrl+W</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- NEW BUTTON -->
+      <button id="new-file-btn" title="Create New Markdown Tab (Ctrl+N)" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M8 3v10M3 8h10" />
+        </svg>
+        <span>New</span>
+      </button>
+
+      <!-- MODE DROPDOWN -->
+      <div class="relative flex items-center" id="mode-menu-wrapper">
+        <button id="mode-menu-btn" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1.5">
+          <span>Mode: <span id="mode-current-label" class="font-semibold" style="color: var(--text-primary);">Edit</span></span>
+          <svg class="w-3 h-3 opacity-60" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+
+        <div id="mode-dropdown" class="dropdown-panel hidden absolute left-0 top-[32px] w-56 p-1.5 text-[13px]">
+          <button data-mode="edit" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold" style="color: var(--accent);">✓</span>
+              <span>Edit (Full Width)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Raw</span>
+          </button>
+          <button data-mode="split" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold opacity-0" style="color: var(--accent);">✓</span>
+              <span>Split (50 / 50)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Live</span>
+          </button>
+          <button data-mode="preview" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold opacity-0" style="color: var(--accent);">✓</span>
+              <span>Preview (Full Width)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Read</span>
+          </button>
+          <div class="my-1 border-t" style="border-color: var(--border-hairline);"></div>
+          <div class="px-2.5 py-1 text-[11px] flex justify-between" style="color: var(--text-muted);">
+            <span>Cycle Mode</span>
+            <span>Ctrl+E</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Live Stats & Status Pill -->
+    <div class="flex items-center gap-3 text-[12px]" style="color: var(--text-secondary);">
+      <span id="cursor-stats" class="hidden sm:inline font-mono text-[11.5px]">Ln 1, Col 1</span>
+      <span class="hidden sm:inline opacity-30">|</span>
+      <span id="word-stats" class="text-[12px]">0 words</span>
+      <span id="save-status-pill" class="px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center gap-1.5 transition-colors" style="background-color: var(--bg-active-pill); color: var(--text-secondary);">
+        <span id="save-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span id="save-status-text">Saved</span>
+      </span>
+    </div>
+  </nav>
+
+  <!-- 3. BROWSER-STYLE TAB BAR (36px height) -->
+  <div id="tab-bar" class="h-[36px] tab-strip px-2.5 flex items-end gap-1 overflow-x-auto shrink-0">
+    <!-- Tabs rendered dynamically via JS -->
+  </div>
+
+  <!-- 4. FULL-WIDTH CONTENT AREA (flex-1, 100% width, zero sidebars) -->
+  <main id="workspace" class="flex-1 w-full h-full surface-area flex overflow-hidden relative">
+    <!-- Left / Primary Editor Pane -->
+    <section id="editor-pane" class="h-full flex flex-col overflow-hidden" style="width: 100%;">
+      <textarea
+        id="markdown-editor"
+        spellcheck="false"
+        placeholder="Start writing in Markdown..."
+        aria-label="Markdown Editor"
+      ></textarea>
+    </section>
+
+    <!-- Draggable 1px Divider (visible only in Split mode) -->
+    <div id="split-resizer" class="split-resizer hidden" title="Drag to resize panes"></div>
+
+    <!-- Right / Preview Pane (visible in Split and Preview modes) -->
+    <section id="preview-pane" class="h-full hidden overflow-hidden" style="width: 50%;">
+      <article id="markdown-preview" class="markdown-preview"></article>
+    </section>
+  </main>
+
+  <!-- Subtle Non-Blocking Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 px-3.5 py-2 rounded-lg text-[12.5px] font-medium shadow-lg pointer-events-none opacity-0 translate-y-2 transition-all duration-200 z-50" style="background-color: var(--text-primary); color: var(--bg-surface);">
+    Notification
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. INITIAL STATE & SAMPLE DOCUMENTS
+    // =========================================================================
+    const initialDocuments = [
+      {
+        id: 'doc-1',
+        title: 'system-design.md',
+        dirty: false,
+        content: `# Distributed Event Ingestion Architecture
+
+A high-throughput, low-latency pipeline designed to ingest, validate, and route **250,000+ events/sec** across multi-region clusters with zero data loss.
+
+## Core Design Principles
+
+- **Full-Width Clarity:** Notice how wide architecture tables, logs, and code blocks breathe naturally across the entire desktop viewport without artificial center column constraints.
+- **Stateless Edge Ingestion:** Edge gateways terminate TLS, enforce schema contracts, and append directly to partitioned write-ahead logs.
+- **Idempotent Consumers:** Every event carries a deterministic \`event_id\` (UUIDv7) enabling safe at-least-once replay.
+
+## Service Topology & SLA Matrix
+
+| Service Layer | Primary Responsibility | Storage Engine | Target P99 Latency | Replication Strategy |
+| :--- | :--- | :--- | :--- | :--- |
+| **Edge Gateway** | Auth, rate limiting, JSON/Protobuf validation | In-Memory Ring Buffer | \`< 4.5 ms\` | Stateless Anycast |
+| **Ingest Broker** | Durable partitioned append-only commit log | NVMe Segmented Log | \`< 11.0 ms\` | Quorum ISR (RF=3) |
+| **Stream Router** | Filtering, enrichment, and dead-letter routing | RocksDB State Store | \`< 18.0 ms\` | Changelog Topic |
+| **Analytics Sink** | Micro-batch Parquet compaction to object storage | S3 / Iceberg Tables | \`< 1,200 ms\` | Multi-Region Async |
+
+## Partition Routing Implementation
+
+\`\`\`typescript
+interface IngestEvent {
+  eventId: string;
+  tenantId: string;
+  timestamp: number;
+  payload: Record<string, unknown>;
+}
+
+export function resolvePartition(event: IngestEvent, partitionCount: number): number {
+  // Consistent FNV-1a hash on tenantId to preserve per-tenant ordering
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < event.tenantId.length; i++) {
+    hash ^= event.tenantId.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0) % partitionCount;
+}
+\`\`\`
+
+> **Operational Note:** When scaling partition counts dynamically, enable dual-write shadow topics for 15 minutes before shifting consumer group offsets.`
+      },
+      {
+        id: 'doc-2',
+        title: 'daily-tasks.md',
+        dirty: false,
+        content: `# Daily Engineering Checklist
+
+Focus areas for today's sprint cycle.
+
+## High Priority
+- [x] Review pull request #418 for zero-copy buffer pooling
+- [x] Benchmark full-width Markdown rendering performance on 10k-line documents
+- [ ] Finalize API rate-limit headers for v2 public endpoints
+- [ ] Update staging environment TLS certificates
+
+## Quick Notes
+1. **Sync with Infrastructure at 3:30 PM:** Confirm NVMe IOPS limits on the eu-central cluster.
+2. **Documentation:** Keep runbooks concise, scannable, and stored as plain \`.md\` files in the root repository.`
+      },
+      {
+        id: 'doc-3',
+        title: 'scratchpad.md',
+        dirty: false,
+        content: `# Scratchpad
+
+Quick thoughts, release snippets, and temporary commands.
+
+\`\`\`bash
+# Tail production gateway metrics
+kubectl logs -l app=edge-gateway -n prod --tail=100 -f
+\`\`\`
+
+- Keyboard shortcuts in **Slate**:
+  - \`Ctrl/Cmd + N\` — New tab
+  - \`Ctrl/Cmd + S\` — Save / Download \`.md\`
+  - \`Ctrl/Cmd + E\` — Cycle Edit / Split / Preview mode
+  - \`Ctrl/Cmd + W\` — Close active tab`
+      }
+    ];
+
+    const state = {
+      docs: JSON.parse(JSON.stringify(initialDocuments)),
+      activeId: 'doc-1',
+      mode: 'edit', // 'edit' | 'split' | 'preview'
+      theme: 'light', // 'light' | 'dark'
+      splitRatio: 50, // percentage for left pane in split mode
+      renamingId: null,
+      untitledCounter: 1
+    };
+
+    // =========================================================================
+    // 2. DOM REFERENCES
+    // =========================================================================
+    const htmlEl = document.documentElement;
+    const titlebarActiveFile = document.getElementById('titlebar-active-file');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+    const themeLabel = document.getElementById('theme-label');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+    const fileMenuBtn = document.getElementById('file-menu-btn');
+    const fileDropdown = document.getElementById('file-dropdown');
+    const newFileBtn = document.getElementById('new-file-btn');
+    const modeMenuBtn = document.getElementById('mode-menu-btn');
+    const modeDropdown = document.getElementById('mode-dropdown');
+    const modeCurrentLabel = document.getElementById('mode-current-label');
+
+    const localFileInput = document.getElementById('local-file-input');
+    const tabBar = document.getElementById('tab-bar');
+    const workspace = document.getElementById('workspace');
+    const editorPane = document.getElementById('editor-pane');
+    const previewPane = document.getElementById('preview-pane');
+    const splitResizer = document.getElementById('split-resizer');
+    const editorEl = document.getElementById('markdown-editor');
+    const previewEl = document.getElementById('markdown-preview');
+
+    const cursorStatsEl = document.getElementById('cursor-stats');
+    const wordStatsEl = document.getElementById('word-stats');
+    const saveStatusDot = document.getElementById('save-status-dot');
+    const saveStatusText = document.getElementById('save-status-text');
+    const toastEl = document.getElementById('toast');
+
+    // Configure Marked.js for GitHub Flavored Markdown & clean line breaks
+    if (window.marked) {
+      marked.setOptions({
+        gfm: true,
+        breaks: true
+      });
+    }
+
+    // =========================================================================
+    // 3. HELPERS & RENDERERS
+    // =========================================================================
+    function getActiveDoc() {
+      return state.docs.find(d => d.id === state.activeId) || state.docs[0];
+    }
+
+    let toastTimeout = null;
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.remove('opacity-0', 'translate-y-2');
+      toastEl.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.remove('opacity-100', 'translate-y-0');
+        toastEl.classList.add('opacity-0', 'translate-y-2');
+      }, 2200);
+    }
+
+    function updateStats() {
+      const text = editorEl.value;
+      const trimmed = text.trim();
+      const words = trimmed ? trimmed.split(/\s+/).length : 0;
+      wordStatsEl.textContent = `${words.toLocaleString()} ${words === 1 ? 'word' : 'words'}`;
+
+      const cursorPos = editorEl.selectionStart || 0;
+      const textBefore = text.slice(0, cursorPos);
+      const lines = textBefore.split('\n');
+      const lineNum = lines.length;
+      const colNum = lines[lines.length - 1].length + 1;
+      cursorStatsEl.textContent = `Ln ${lineNum}, Col ${colNum}`;
+    }
+
+    function updateSaveIndicator(doc) {
+      if (!doc) return;
+      if (doc.dirty) {
+        saveStatusDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+        saveStatusText.textContent = 'Unsaved';
+      } else {
+        saveStatusDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+        saveStatusText.textContent = 'Saved';
+      }
+    }
+
+    function renderMarkdownPreview() {
+      const doc = getActiveDoc();
+      if (!doc) return;
+      if (window.marked) {
+        previewEl.innerHTML = marked.parse(doc.content || '');
+      } else {
+        previewEl.textContent = doc.content || '';
+      }
+    }
+
+    function renderTabs() {
+      tabBar.innerHTML = '';
+
+      state.docs.forEach(doc => {
+        const isActive = doc.id === state.activeId;
+        const tab = document.createElement('div');
+        tab.className = `browser-tab px-3 flex items-center gap-2 text-[12.5px] max-w-[210px] ${isActive ? 'active' : ''}`;
+        tab.title = `${doc.title} (Double-click to rename)`;
+
+        // Subtle Markdown file icon
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'shrink-0 opacity-65';
+        iconSpan.innerHTML = `
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.5 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5L9.5 2z"/>
+            <path d="M9.5 2v3.5H13"/>
+          </svg>
+        `;
+        tab.appendChild(iconSpan);
+
+        // Title or Inline Rename Input
+        if (state.renamingId === doc.id) {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = doc.title;
+          input.className = 'w-28 px-1 py-0.2 text-[12.5px] rounded outline-none border';
+          input.style.backgroundColor = 'var(--bg-surface)';
+          input.style.color = 'var(--text-primary)';
+          input.style.borderColor = 'var(--accent)';
+
+          const commitRename = () => {
+            let nextName = input.value.trim();
+            if (nextName) {
+              if (!nextName.includes('.')) nextName += '.md';
+              doc.title = nextName;
+            }
+            state.renamingId = null;
+            renderTabs();
+            syncActiveDocumentUI();
+          };
+
+          input.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') commitRename();
+            if (e.key === 'Escape') {
+              state.renamingId = null;
+              renderTabs();
+            }
+          });
+          input.addEventListener('blur', commitRename);
+          tab.appendChild(input);
+
+          setTimeout(() => {
+            input.focus();
+            const dotIndex = input.value.lastIndexOf('.');
+            input.setSelectionRange(0, dotIndex > 0 ? dotIndex : input.value.length);
+          }, 10);
+        } else {
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'truncate';
+          titleSpan.textContent = doc.title;
+          tab.appendChild(titleSpan);
+        }
+
+        // Unsaved dot indicator
+        if (doc.dirty) {
+          const dot = document.createElement('span');
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0';
+          dot.title = 'Unsaved changes';
+          tab.appendChild(dot);
+        }
+
+        // Close button (×)
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'tab-close-btn w-4 h-4 flex items-center justify-center shrink-0 ml-0.5';
+        closeBtn.title = 'Close Tab';
+        closeBtn.innerHTML = `
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M3 3l6 6M9 3l-6 6"/>
+          </svg>
+        `;
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeTab(doc.id);
+        });
+        tab.appendChild(closeBtn);
+
+        // Select tab
+        tab.addEventListener('click', () => {
+          if (state.activeId !== doc.id) {
+            state.activeId = doc.id;
+            renderTabs();
+            syncActiveDocumentUI();
+          }
+        });
+
+        // Double-click to rename
+        tab.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          state.renamingId = doc.id;
+          renderTabs();
+        });
+
+        tabBar.appendChild(tab);
+      });
+
+      // Quick '+' button right after tabs (browser style)
+      const addTabBtn = document.createElement('button');
+      addTabBtn.className = 'menu-btn w-7 h-7 mb-0.5 ml-0.5 flex items-center justify-center shrink-0';
+      addTabBtn.title = 'New Tab (Ctrl+N)';
+      addTabBtn.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M8 3.5v9M3.5 8h9"/>
+        </svg>
+      `;
+      addTabBtn.addEventListener('click', createNewTab);
+      tabBar.appendChild(addTabBtn);
+    }
+
+    function syncActiveDocumentUI() {
+      const doc = getActiveDoc();
+      if (!doc) return;
+      titlebarActiveFile.textContent = `— ${doc.title}`;
+      editorEl.value = doc.content;
+      updateStats();
+      updateSaveIndicator(doc);
+      if (state.mode === 'split' || state.mode === 'preview') {
+        renderMarkdownPreview();
+      }
+    }
+
+    // =========================================================================
+    // 4. MODE SWITCHING (EDIT / SPLIT / PREVIEW)
+    // =========================================================================
+    function setMode(newMode) {
+      state.mode = newMode;
+
+      // Update Mode label inside the Mode button itself
+      const labels = { edit: 'Edit', split: 'Split', preview: 'Preview' };
+      modeCurrentLabel.textContent = labels[newMode];
+
+      if (newMode === 'edit') {
+        editorPane.classList.remove('hidden');
+        editorPane.style.width = '100%';
+        splitResizer.classList.add('hidden');
+        previewPane.classList.add('hidden');
+        editorEl.focus();
+      } else if (newMode === 'split') {
+        editorPane.classList.remove('hidden');
+        splitResizer.classList.remove('hidden');
+        previewPane.classList.remove('hidden');
+        editorPane.style.width = `${state.splitRatio}%`;
+        previewPane.style.width = `${100 - state.splitRatio}%`;
+        renderMarkdownPreview();
+      } else if (newMode === 'preview') {
+        editorPane.classList.add('hidden');
+        splitResizer.classList.add('hidden');
+        previewPane.classList.remove('hidden');
+        previewPane.style.width = '100%';
+        renderMarkdownPreview();
+      }
+
+      // Update checkmark in Mode dropdown
+      document.querySelectorAll('.mode-option').forEach(btn => {
+        const check = btn.querySelector('.mode-check');
+        if (btn.dataset.mode === newMode) {
+          check.classList.remove('opacity-0');
+        } else {
+          check.classList.add('opacity-0');
+        }
+      });
+    }
+
+    function cycleMode() {
+      const order = ['edit', 'split', 'preview'];
+      const next = order[(order.indexOf(state.mode) + 1) % order.length];
+      setMode(next);
+      showToast(`Mode: ${next.charAt(0).toUpperCase() + next.slice(1)}`);
+    }
+
+    // =========================================================================
+    // 5. FILE & TAB OPERATIONS
+    // =========================================================================
+    function createNewTab() {
+      const id = 'doc-' + Date.now();
+      const title = `untitled-${state.untitledCounter++}.md`;
+      state.docs.push({
+        id,
+        title,
+        dirty: false,
+        content: `# ${title.replace('.md', '')}\n\n`
+      });
+      state.activeId = id;
+      renderTabs();
+      syncActiveDocumentUI();
+      if (state.mode === 'preview') setMode('edit');
+      editorEl.focus();
+      editorEl.setSelectionRange(editorEl.value.length, editorEl.value.length);
+    }
+
+    function closeTab(id) {
+      const idx = state.docs.findIndex(d => d.id === id);
+      if (idx === -1) return;
+
+      state.docs.splice(idx, 1);
+
+      if (state.docs.length === 0) {
+        state.untitledCounter = 1;
+        createNewTab();
+        return;
+      }
+
+      if (state.activeId === id) {
+        const nextDoc = state.docs[Math.min(idx, state.docs.length - 1)];
+        state.activeId = nextDoc.id;
+      }
+
+      renderTabs();
+      syncActiveDocumentUI();
+    }
+
+    function saveCurrentFile() {
+      const doc = getActiveDoc();
+      if (!doc) return;
+
+      const blob = new Blob([doc.content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.title || 'document.md';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      doc.dirty = false;
+      renderTabs();
+      updateSaveIndicator(doc);
+      showToast(`Saved ${doc.title}`);
+    }
+
+    function openLocalFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        const id = 'doc-' + Date.now();
+        state.docs.push({
+          id,
+          title: file.name,
+          dirty: false,
+          content
+        });
+        state.activeId = id;
+        renderTabs();
+        syncActiveDocumentUI();
+        showToast(`Opened ${file.name}`);
+      };
+      reader.readAsText(file);
+    }
+
+    // =========================================================================
+    // 6. THEME TOGGLE
+    // =========================================================================
+    function toggleTheme() {
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+      if (state.theme === 'dark') {
+        htmlEl.classList.add('dark');
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
+        themeLabel.textContent = 'Light';
+      } else {
+        htmlEl.classList.remove('dark');
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
+        themeLabel.textContent = 'Dark';
+      }
+    }
+
+    // =========================================================================
+    // 7. SPLIT PANE DRAG RESIZING
+    // =========================================================================
+    let isDraggingSplit = false;
+
+    splitResizer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      isDraggingSplit = true;
+      splitResizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingSplit) return;
+      const rect = workspace.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const percent = Math.max(20, Math.min(80, (offsetX / rect.width) * 100));
+      state.splitRatio = percent;
+      editorPane.style.width = `${percent}%`;
+      previewPane.style.width = `${100 - percent}%`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDraggingSplit) {
+        isDraggingSplit = false;
+        splitResizer.classList.remove('dragging');
+        document.body.style.cursor = '';
+      }
+    });
+
+    // =========================================================================
+    // 8. EVENT LISTENERS & KEYBOARD SHORTCUTS
+    // =========================================================================
+    function closeAllDropdowns() {
+      fileDropdown.classList.add('hidden');
+      modeDropdown.classList.add('hidden');
+      fileMenuBtn.classList.remove('active');
+      modeMenuBtn.classList.remove('active');
+    }
+
+    fileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = fileDropdown.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) {
+        fileDropdown.classList.remove('hidden');
+        fileMenuBtn.classList.add('active');
+      }
+    });
+
+    modeMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = modeDropdown.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) {
+        modeDropdown.classList.remove('hidden');
+        modeMenuBtn.classList.add('active');
+      }
+    });
+
+    document.addEventListener('click', closeAllDropdowns);
+
+    // File Dropdown Actions
+    document.getElementById('menu-open-file').addEventListener('click', () => {
+      closeAllDropdowns();
+      localFileInput.value = '';
+      localFileInput.click();
+    });
+
+    localFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        openLocalFile(e.target.files[0]);
+      }
+    });
+
+    document.getElementById('menu-save-file').addEventListener('click', () => {
+      closeAllDropdowns();
+      saveCurrentFile();
+    });
+
+    document.getElementById('menu-rename-file').addEventListener('click', () => {
+      closeAllDropdowns();
+      state.renamingId = state.activeId;
+      renderTabs();
+    });
+
+    document.getElementById('menu-close-tab').addEventListener('click', () => {
+      closeAllDropdowns();
+      closeTab(state.activeId);
+    });
+
+    // Mode Dropdown Actions
+    document.querySelectorAll('.mode-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeAllDropdowns();
+        setMode(btn.dataset.mode);
+      });
+    });
+
+    // Menu Actions
+    newFileBtn.addEventListener('click', createNewTab);
+    themeToggleBtn.addEventListener('click', toggleTheme);
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {
+          showToast('Fullscreen toggled');
+        });
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Editor Input & Tab Key Indentation
+    editorEl.addEventListener('input', () => {
+      const doc = getActiveDoc();
+      if (!doc) return;
+      doc.content = editorEl.value;
+      if (!doc.dirty) {
+        doc.dirty = true;
+        renderTabs();
+        updateSaveIndicator(doc);
+      }
+      updateStats();
+      if (state.mode === 'split') {
+        renderMarkdownPreview();
+      }
+    });
+
+    editorEl.addEventListener('click', updateStats);
+    editorEl.addEventListener('keyup', updateStats);
+
+    editorEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = editorEl.selectionStart;
+        const end = editorEl.selectionEnd;
+        editorEl.value = editorEl.value.substring(0, start) + '  ' + editorEl.value.substring(end);
+        editorEl.selectionStart = editorEl.selectionEnd = start + 2;
+        editorEl.dispatchEvent(new Event('input'));
+      }
+    });
+
+    // Global Desktop Shortcuts
+    window.addEventListener('keydown', (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveCurrentFile();
+      } else if (mod && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        localFileInput.value = '';
+        localFileInput.click();
+      } else if (mod && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        createNewTab();
+      } else if (mod && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        cycleMode();
+      } else if (mod && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        closeTab(state.activeId);
+      } else if (e.key === 'F2') {
+        e.preventDefault();
+        state.renamingId = state.activeId;
+        renderTabs();
+      }
+    });
+
+    // =========================================================================
+    // 9. BOOTSTRAP
+    // =========================================================================
+    renderTabs();
+    syncActiveDocumentUI();
+    setMode('edit');
+  </script>
+</body>
+</html>

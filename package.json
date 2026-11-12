@@ -1,0 +1,12 @@
+{
+  "name": "adwaid-view",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Distraction-free Linux desktop Markdown editor and viewer for Fedora 45",
+  "type": "module",
+  "scripts": {
+    "dev": "cargo tauri dev",
+    "build": "cargo tauri build",
+    "build:rpm": "cargo tauri build --bundles rpm"
+  }
+}

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>adwaid-view</title>
+  <link rel="stylesheet" href="./styles/main.css" />
+  <script src="./vendor/marked.min.js"></script>
+</head>
+<body class="w-screen h-screen flex flex-col overflow-hidden">
+
+  <!-- 1. TITLE BAR (32px height) with native frameless window drag region -->
+  <header class="h-[32px] chrome-bar hairline-b px-3 flex items-center justify-between shrink-0" data-tauri-drag-region>
+    <!-- Left: App Icon & Name -->
+    <div class="flex items-center gap-2" data-tauri-drag-region>
+      <img src="./assets/logo.svg" alt="adwaid-view" class="w-4 h-4 rounded-[4px] shrink-0" data-tauri-drag-region />
+      <span class="text-[12.5px] font-semibold tracking-tight" style="color: var(--text-primary);">adwaid-view</span>
+      <span id="titlebar-active-file" class="text-[11.5px]" style="color: var(--text-muted);">— untitled-1.md</span>
+    </div>
+
+    <!-- Right: Theme Switcher & Desktop Frameless Window Controls -->
+    <div class="flex items-center gap-1">
+      <button id="theme-toggle-btn" title="Toggle Light / Dark Theme" class="menu-btn h-6 px-2 flex items-center gap-1.5 text-[11.5px] font-medium" data-tauri-no-drag>
+        <svg id="icon-sun" class="hidden w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <svg id="icon-moon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+        <span id="theme-label">Dark</span>
+      </button>
+
+      <div class="h-3.5 w-[1px] mx-1" style="background-color: var(--border-hairline);"></div>
+
+      <!-- Native Frameless Window Controls -->
+      <button id="window-minimize-btn" title="Minimize Window" class="win-ctrl-btn" data-tauri-no-drag>
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M2 6h8" />
+        </svg>
+      </button>
+      <button id="window-maximize-btn" title="Maximize / Restore Window" class="win-ctrl-btn" data-tauri-no-drag>
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="2" y="2" width="8" height="8" rx="1" />
+        </svg>
+      </button>
+      <button id="window-close-btn" title="Close Window" class="win-ctrl-btn win-ctrl-close" data-tauri-no-drag>
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. MENU / CONTROL BAR (38px height) -->
+  <nav class="h-[38px] chrome-bar hairline-b px-3 flex items-center justify-between shrink-0 relative">
+    <!-- Left Menu Items: File, New, Mode -->
+    <div class="flex items-center gap-1">
+      <!-- FILE DROPDOWN -->
+      <div class="relative" id="file-menu-wrapper">
+        <button id="file-menu-btn" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1">
+          <span>File</span>
+          <svg class="w-3 h-3 opacity-60" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+
+        <div id="file-dropdown" class="dropdown-panel hidden absolute left-0 top-[32px] w-56 p-1.5 text-[13px]">
+          <button id="menu-open-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Open Local File...</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Ctrl+O</span>
+          </button>
+          <button id="menu-save-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Save</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Ctrl+S</span>
+          </button>
+          <button id="menu-save-as-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Save As...</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Ctrl+Shift+S</span>
+          </button>
+          <button id="menu-rename-file" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <span>Rename Current File</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">F2</span>
+          </button>
+          <div class="my-1 border-t"></div>
+          <button id="menu-close-tab" class="dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left text-red-500">
+            <span>Close Tab</span>
+            <span class="text-[11px] opacity-75">Ctrl+W</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- NEW BUTTON -->
+      <button id="new-file-btn" title="Create New Markdown Tab (Ctrl+N)" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M8 3v10M3 8h10" />
+        </svg>
+        <span>New</span>
+      </button>
+
+      <!-- MODE DROPDOWN (Displays active mode inside button itself) -->
+      <div class="relative flex items-center" id="mode-menu-wrapper">
+        <button id="mode-menu-btn" class="menu-btn h-7 px-2.5 text-[13px] font-medium flex items-center gap-1.5">
+          <span>Mode: <span id="mode-current-label" class="font-semibold" style="color: var(--text-primary);">Edit</span></span>
+          <svg class="w-3 h-3 opacity-60" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+
+        <div id="mode-dropdown" class="dropdown-panel hidden absolute left-0 top-[32px] w-56 p-1.5 text-[13px]">
+          <button data-mode="edit" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold" style="color: var(--accent);">✓</span>
+              <span>Edit (Full Width)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Raw</span>
+          </button>
+          <button data-mode="split" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold opacity-0" style="color: var(--accent);">✓</span>
+              <span>Split (50 / 50)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Live</span>
+          </button>
+          <button data-mode="preview" class="mode-option dropdown-item w-full px-2.5 py-1.5 flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+              <span class="mode-check w-3.5 text-center font-semibold opacity-0" style="color: var(--accent);">✓</span>
+              <span>Preview (Full Width)</span>
+            </div>
+            <span class="text-[11px]" style="color: var(--text-muted);">Read</span>
+          </button>
+          <div class="my-1 border-t"></div>
+          <div class="px-2.5 py-1 text-[11px] flex justify-between" style="color: var(--text-muted);">
+            <span>Cycle Mode</span>
+            <span>Ctrl+E</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Live Stats & Status Pill -->
+    <div class="flex items-center gap-3 text-[12px]" style="color: var(--text-secondary);">
+      <span id="cursor-stats" class="font-mono text-[11.5px]">Ln 1, Col 1</span>
+      <span class="opacity-30">|</span>
+      <span id="word-stats" class="text-[12px]">0 words</span>
+      <span id="save-status-pill" class="px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center gap-1.5 transition-colors" style="background-color: var(--bg-active-pill); color: var(--text-secondary);">
+        <span id="save-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span id="save-status-text">Saved</span>
+      </span>
+    </div>
+  </nav>
+
+  <!-- 3. BROWSER-STYLE TAB BAR (36px height) -->
+  <div id="tab-bar" class="h-[36px] tab-strip px-2.5 flex items-end gap-1 overflow-x-auto shrink-0">
+    <!-- Tabs rendered dynamically via JS -->
+  </div>
+
+  <!-- 4. FULL-WIDTH CONTENT AREA (flex-1, 100% width, zero sidebars) -->
+  <main id="workspace" class="flex-1 w-full h-full surface-area flex overflow-hidden relative">
+    <!-- Left / Primary Editor Pane -->
+    <section id="editor-pane" class="h-full flex flex-col overflow-hidden" style="width: 100%;">
+      <textarea
+        id="markdown-editor"
+        spellcheck="false"
+        placeholder="Start writing in Markdown..."
+        aria-label="Markdown Editor"
+      ></textarea>
+    </section>
+
+    <!-- Draggable 1px Divider (visible only in Split mode) -->
+    <div id="split-resizer" class="split-resizer hidden" title="Drag to resize panes"></div>
+
+    <!-- Right / Preview Pane (visible in Split and Preview modes) -->
+    <section id="preview-pane" class="h-full hidden overflow-hidden" style="width: 50%;">
+      <article id="markdown-preview" class="markdown-preview"></article>
+    </section>
+  </main>
+
+  <!-- Subtle Non-Blocking Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 px-3.5 py-2 rounded-lg text-[12.5px] font-medium shadow-lg pointer-events-none opacity-0 translate-y-2 transition-all duration-200 z-50" style="background-color: var(--text-primary); color: var(--bg-surface);">
+    Notification
+  </div>
+
+  <!-- Unsaved Changes Confirmation Modal -->
+  <div id="confirm-modal" class="confirm-backdrop hidden">
+    <div class="confirm-dialog">
+      <h3 id="confirm-title" class="confirm-heading">Unsaved Changes</h3>
+      <p id="confirm-message" class="confirm-body">Do you want to save changes before closing?</p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel-btn" class="modal-btn modal-btn-secondary">Cancel</button>
+        <button id="confirm-discard-btn" class="modal-btn modal-btn-danger">Don't Save</button>
+        <button id="confirm-save-btn" class="modal-btn modal-btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

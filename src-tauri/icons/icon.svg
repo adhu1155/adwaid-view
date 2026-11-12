@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Soft Lavender Mist squircle fill -->
+    <linearGradient id="bgFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ECECFA"/>
+      <stop offset="100%" stop-color="#E4E4F8"/>
+    </linearGradient>
+
+    <!-- Left leg of A (Medium Orchid) -->
+    <linearGradient id="legA_left" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A842C4"/>
+      <stop offset="100%" stop-color="#BA55D3"/>
+    </linearGradient>
+
+    <!-- Right leg of A (Medium Orchid with deeper fold shadow at top) -->
+    <linearGradient id="legA_right" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9A36B4"/>
+      <stop offset="50%" stop-color="#AC47C6"/>
+      <stop offset="100%" stop-color="#B650CF"/>
+    </linearGradient>
+
+    <!-- Diagonal ribbon from bottom-left of A up to top-right of V (Plum to Thistle) -->
+    <linearGradient id="diagRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#BA68C8"/>
+      <stop offset="22%" stop-color="#D699D8"/>
+      <stop offset="85%" stop-color="#DDA0DD"/>
+      <stop offset="100%" stop-color="#C888CB"/>
+    </linearGradient>
+
+    <!-- Right leg of V descending from top-right to bottom-right of A (Plum) -->
+    <linearGradient id="legV_right" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D998DA"/>
+      <stop offset="75%" stop-color="#D594D6"/>
+      <stop offset="100%" stop-color="#9E47AC"/>
+    </linearGradient>
+
+    <!-- Subtle inner fold shadows -->
+    <linearGradient id="topFoldShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7B2CBF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#7B2CBF" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="underCrossShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5A189A" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#5A189A" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="bottomLeftFoldShadow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6A1B9A" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#6A1B9A" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="bottomRightFoldShadow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6A1B9A" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#6A1B9A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Squircle Container with Medium Orchid (#BA55D3) Border -->
+  <rect x="24" y="24" width="464" height="464" rx="108" ry="108"
+        fill="url(#bgFill)" stroke="#BA55D3" stroke-width="14"/>
+
+  <!-- Centered AV Ribbon Group -->
+  <g transform="translate(-18, 0)">
+    <!-- 1. Right leg of A (passes under the diagonal ribbon) -->
+    <polygon points="196,133 257,133 354,378 293,378" fill="url(#legA_right)"/>
+
+    <!-- Dark fold triangle at top apex of A -->
+    <polygon points="196,133 257,133 226.5,210" fill="url(#topFoldShadow)"/>
+
+    <!-- 2. Right leg of V (descends from top-right to meet bottom-right of A) -->
+    <polygon points="386,133 447,133 354,378 293,378" fill="url(#legV_right)"/>
+
+    <!-- Fold shadow at bottom-right vertex where V meets A's right foot -->
+    <polygon points="319,310 354,378 293,378" fill="url(#bottomRightFoldShadow)"/>
+
+    <!-- Shadow cast by diagonal ribbon onto A's right leg and V's right leg -->
+    <polygon points="244,254 277,338 308,312 275,228" fill="url(#underCrossShadow)"/>
+    <polygon points="350,228 386,133 402,175 342,250" fill="url(#topFoldShadow)"/>
+
+    <!-- 3. Diagonal ribbon sweeping from bottom-left foot of A up to top-right apex of V -->
+    <polygon points="100,378 161,378 447,133 386,133" fill="url(#diagRibbon)"/>
+
+    <!-- Fold shadow on diagonal ribbon just right of A's left leg -->
+    <polygon points="161,378 215,332 184,306 100,378" fill="url(#bottomLeftFoldShadow)"/>
+
+    <!-- 4. Left leg of A (foreground, crisp top-to-bottom stroke) -->
+    <polygon points="196,133 257,133 161,378 100,378" fill="url(#legA_left)"/>
+
+    <!-- Crisp apex highlight fold on A -->
+    <polygon points="196,133 257,133 226.5,210" fill="#B84FD1" fill-opacity="0.55"/>
+  </g>
+</svg>

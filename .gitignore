@@ -1,0 +1,15 @@
+# Rust / Tauri build artifacts
+src-tauri/target/
+target/
+
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Local environment & caches
+.DS_Store
+*.log

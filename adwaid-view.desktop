@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=adwaid-view
+GenericName=Markdown Editor
+Comment=Lightweight distraction-free Markdown editor and viewer for Fedora Linux
+Exec=adwaid-view %F
+Icon=adwaid-view
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Utility;TextEditor;Office;Development;
+MimeType=text/markdown;text/x-markdown;text/plain;
+Keywords=markdown;editor;viewer;notes;gfm;docs;
+StartupWMClass=adwaid-view
