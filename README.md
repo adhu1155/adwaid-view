@@ -1,123 +1,159 @@
-# adwaid-view
-
 <div align="center">
-  <img src="./src-tauri/icons/128x128.png" alt="adwaid-view icon" width="96" height="96" />
-  <p><strong>A distraction-free, full-width Linux desktop Markdown editor & viewer built with Tauri v2 and WebKitGTK.</strong></p>
-  <p><em>Optimized specifically for Fedora Linux (Wayland & XWayland).</em></p>
+  <img src="./src-tauri/icons/128x128.png" alt="adwaid-view logo - Distraction-free Linux Markdown Editor" width="100" height="100" />
+  <h1>adwaid-view</h1>
+  <p><strong>A Distraction-Free, Full-Width Desktop Markdown Editor & Viewer for Linux</strong></p>
+
+  [![Latest Release](https://img.shields.io/github/v/release/adhu1155/adwaid-view?color=blue&label=Release&logo=github)](https://github.com/adhu1155/adwaid-view/releases/latest)
+  [![Platform](https://img.shields.io/badge/Platform-Linux%20(Wayland%20%26%20X11)-informational?logo=linux)](https://github.com/adhu1155/adwaid-view/releases/latest)
+  [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+  [![Memory Usage](https://img.shields.io/badge/Memory%20Footprint-~35%20MB%20RAM-brightgreen)](https://github.com/adhu1155/adwaid-view)
 </div>
 
 ---
 
-## Quick Install (Fedora Linux)
+**adwaid-view** is an ultra-fast, lightweight Linux desktop Markdown editor designed for focused writing and reading. Unlike traditional note apps cluttered with complex sidebars, heavy browser runtimes, or artificial narrow page margins, `adwaid-view` gives **100% of the screen** to your Markdown content with native Wayland and X11 desktop integration.
 
-No git or code compilation required! Install the latest release directly via `dnf`:
+---
 
+## ⚡ Quick Install
+
+No coding or build tools required. Choose your Linux distribution below:
+
+### 🔵 Fedora / RHEL / AlmaLinux
+Install the native RPM package with a single terminal command:
 ```bash
 sudo dnf install https://github.com/adhu1155/adwaid-view/releases/download/v0.1.0/adwaid-view-0.1.0-1.x86_64.rpm
 ```
-
-Or download the pre-compiled `.rpm` installer or standalone `.tar.gz` from the [Latest Release page](https://github.com/adhu1155/adwaid-view/releases/tag/v0.1.0).
-
----
-
-## Highlights & Features
-
-- **No Left Sidebar:** Zero file trees, outline panels, or activity bars. Your writing takes 100% of the canvas.
-- **Full-Width Canvas:** Markdown text and tables breathe across the full window width (`24px 28px` padding) without artificial column constraints.
-- **Top Chrome Hierarchy:**
-  - **`32px` Title Bar:** Custom frameless window controls (`Minimize`, `Maximize/Restore`, `Close`), active document name, theme toggle, and native Wayland/X11 dragging via `data-tauri-drag-region`.
-  - **`38px` Menu & Stats Bar:** `File` dropdown (`Open`, `Save`, `Save As`, `Rename`, `Close Tab`), `New` tab button, `Mode` dropdown (`Edit`, `Split`, `Preview`), and live cursor stats (`Ln, Col`), word count, and save status.
-  - **`36px` Browser-Style Tab Strip:** Connected active tabs, unsaved indicators (amber dot), double-click inline renaming (`F2`), close (`×`), and drag-and-drop tab reordering.
-- **Three Viewing Modes (`Ctrl + E`):**
-  - **Edit:** Full-width raw monospace Markdown editor with custom indentation.
-  - **Split:** Side-by-side editing and preview with a draggable 1px divider and proportional bidirectional synchronized scrolling.
-  - **Preview:** Full-width rendered GitHub Flavored Markdown (tables, task lists, code blocks, blockquotes).
-- **Unsaved Changes Guard:** In-app confirmation modal prevents accidental data loss when closing tabs or the application.
-- **External File Modification Detection:** Automatically reloads unmodified buffers when files change on disk and warns on dirty buffer conflicts.
-- **100% Offline Execution:** Bundles `marked.min.js` and local styling with zero external CDN dependencies.
-- **Lightweight:** Native GTK3 / WebKitGTK backend with low memory footprint (~35 MB RSS) and zero Chromium overhead.
+*(To update or reinstall: `sudo dnf reinstall https://github.com/adhu1155/adwaid-view/releases/download/v0.1.0/adwaid-view-0.1.0-1.x86_64.rpm`)*
 
 ---
 
-## System Requirements (Fedora 45 / Linux)
-
-To run or build `adwaid-view` from source on Fedora Linux:
-
+### 🟠 Ubuntu / Debian / Linux Mint / Pop!_OS
+Download and run the standalone portable package:
 ```bash
-sudo dnf install -y \
-  webkit2gtk4.1-devel \
-  librsvg2-devel \
-  libappindicator-gtk3-devel \
-  openssl-devel \
-  @development-tools
+# 1. Ensure runtime libraries are present
+sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-0 librsvg2-common
+
+# 2. Download and extract
+wget https://github.com/adhu1155/adwaid-view/releases/download/v0.1.0/adwaid-view-v0.1.0-x86_64.tar.gz
+tar -xzf adwaid-view-v0.1.0-x86_64.tar.gz
+
+# 3. Launch adwaid-view
+./adwaid-view
 ```
 
 ---
 
-## Getting Started
-
-### Prerequisites
-- **Rust toolchain:** `rustc` and `cargo` (`>= 1.80`)
-- **Tauri CLI v2:** `cargo install tauri-cli --version "^2.0.0"` or via `cargo-binstall tauri-cli`
-- **Node.js:** `>= 18` (optional, for script runners)
-
-### Development Run
-Launch `adwaid-view` in development mode with live reload:
+### ⚪ Arch Linux / Manjaro / EndeavourOS
 ```bash
-cargo tauri dev
-```
+# 1. Install runtime dependencies
+sudo pacman -S --needed webkit2gtk-4.1 librsvg
 
-### Production Build & Fedora RPM Package
-To compile an optimized release binary and generate a native Fedora RPM installer:
-```bash
-cargo tauri build --bundles rpm
-```
+# 2. Download and extract
+curl -sL https://github.com/adhu1155/adwaid-view/releases/download/v0.1.0/adwaid-view-v0.1.0-x86_64.tar.gz | tar -xz
 
-The resulting packages will be generated at:
-- **Standalone Release Binary:** `src-tauri/target/release/adwaid-view`
-- **Fedora RPM Package:** `src-tauri/target/release/bundle/rpm/adwaid-view-0.1.0-1.x86_64.rpm`
-
-To install the RPM locally:
-```bash
-sudo dnf install ./src-tauri/target/release/bundle/rpm/adwaid-view-0.1.0-1.x86_64.rpm
+# 3. Launch adwaid-view
+./adwaid-view
 ```
 
 ---
 
-## Keyboard Shortcuts
+### 📦 Any 64-bit Linux (Portable / No Root Required)
+1. Download **`adwaid-view-v0.1.0-x86_64.tar.gz`** from the [Releases page](https://github.com/adhu1155/adwaid-view/releases/latest).
+2. Right-click and extract the archive (or `tar -xzf adwaid-view-v0.1.0-x86_64.tar.gz`).
+3. Double-click the **`adwaid-view`** executable to start writing!
+
+---
+
+## 🌟 Why adwaid-view?
+
+### 📐 100% Full-Width Canvas
+No narrow centered columns or artificial 700px page limits. Tables, data sets, architectural diagrams, and wide code blocks breathe naturally across your entire widescreen monitor.
+
+### 🚫 Zero Distractions (No Left Sidebar)
+No file tree trees, outline drawers, or activity bars competing for your attention. When you open a file, your content is the only thing on screen.
+
+### 🔄 Three Synchronized Viewing Modes (`Ctrl + E`)
+- **Edit Mode:** Full-width raw monospace editor with 2-space tab indentation.
+- **Split Mode:** Side-by-side editor and live preview with proportional bidirectional synchronized scrolling.
+- **Preview Mode:** Beautiful, clean GitHub Flavored Markdown (GFM) formatting with styled tables, task checklists, and syntax-highlighted code blocks.
+
+### 📑 Browser-Style Tabs
+- Seamlessly manage multiple open Markdown files.
+- Drag-and-drop tabs to reorder.
+- Double-click any tab (or press `F2`) to rename directly on disk.
+- Unsaved changes indicators (amber dot).
+- Smooth horizontal mouse-wheel scrolling across the tab strip.
+
+### 🛡️ Smart Data Protection
+- **Unsaved Changes Guard:** Prevents accidental data loss when closing tabs or quitting the app with prompts to Save, Discard, or Cancel.
+- **External File Sync:** Detects when an open file is modified on disk (by Git, scripts, or terminal editors) and reloads cleanly.
+
+### 🔒 100% Offline & Private
+- Zero cloud sync dependencies.
+- Zero analytics, telemetry, or tracking.
+- Fast offline Markdown parsing with zero external network requests.
+
+### ⚡ Ultra-Lightweight & Fast
+Built with Tauri v2 and native WebKitGTK. Starts up instantly and uses only **~35 MB of RAM** — over **10x lighter** than typical Electron-based Markdown apps.
+
+---
+
+## ⌨️ Essential Keyboard Shortcuts
 
 | Shortcut | Action |
 | :--- | :--- |
-| `Ctrl + N` | Create a new Markdown tab |
-| `Ctrl + O` | Open local Markdown file(s) via native Linux dialog |
-| `Ctrl + S` | Save active tab to disk (prompts Save As if untitled) |
-| `Ctrl + Shift + S` | Save active tab to a new file path (`Save As`) |
-| `Ctrl + E` | Cycle viewing mode (`Edit` → `Split` → `Preview`) |
-| `Ctrl + W` | Close active tab (prompts if unsaved changes exist) |
-| `Ctrl + Tab` / `Ctrl + Shift + Tab` | Switch to next / previous open tab |
-| `F2` | Rename active tab inline |
-| `Tab` (in editor) | Insert 2 spaces without losing editor focus |
+| **`Ctrl + N`** | Open a new blank Markdown tab |
+| **`Ctrl + O`** | Open local file(s) via native file chooser |
+| **`Ctrl + S`** | Save active tab to disk |
+| **`Ctrl + Shift + S`** | Save As to a new file location |
+| **`Ctrl + E`** | Cycle viewing mode (`Edit` → `Split` → `Preview`) |
+| **`Ctrl + W`** | Close active tab (prompts if unsaved changes exist) |
+| **`Ctrl + Tab`** / **`Ctrl + Shift + Tab`** | Switch to next / previous open tab |
+| **`F2`** | Rename active tab inline on disk |
+| **`Tab`** | Insert 2 spaces without losing editor focus |
 
 ---
 
-## CLI Usage
+## 💻 Terminal & File Manager Integration
 
-You can launch `adwaid-view` directly from your terminal and open one or multiple Markdown files:
+Launch `adwaid-view` directly from your command line to open single or multiple Markdown documents:
 
 ```bash
-adwaid-view README.md notes.md ~/docs/architecture.md
+# Open one or multiple files
+adwaid-view README.md notes.md ~/Documents/meeting.md
 ```
 
----
-
-## Architecture
-
-- **`architecture.md`**: Complete architectural specification (Tauri v2 IPC contracts, directory layout, vertical layout anatomy).
-- **`src/`**: Pure Vanilla ES2022 frontend, semantic CSS custom properties, and vendored offline Markdown renderer.
-- **`src-tauri/`**: Native Rust application shell implementing file system IPC commands, frameless window management, and native XDG Desktop Portal file pickers.
+Right-clicking any `.md`, `.markdown`, or `.txt` file in your desktop file manager (GNOME Files, KDE Dolphin, Thunar) allows you to select **"Open with adwaid-view"**.
 
 ---
 
-## License
+<details>
+<summary><strong>🛠️ For Developers & Building from Source</strong></summary>
 
-MIT License. Designed and crafted for Linux.
+<br />
+
+If you wish to compile `adwaid-view` from source:
+
+1. **Install Build Dependencies (Fedora):**
+   ```bash
+   sudo dnf install -y webkit2gtk4.1-devel librsvg2-devel libappindicator-gtk3-devel @development-tools
+   ```
+2. **Development Mode:**
+   ```bash
+   cargo tauri dev
+   ```
+3. **Build Native Binary & RPM Package:**
+   ```bash
+   cargo tauri build --bundles rpm
+   ```
+
+For detailed IPC commands, internal state schema, and architecture specifications, see [`architecture.md`](./architecture.md).
+
+</details>
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE). Built for the Linux desktop community.

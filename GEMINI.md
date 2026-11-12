@@ -50,12 +50,22 @@ When running in this repository for the **first time** (before the Tauri project
 ---
 
 ## 5. Branching Strategy & Git Workflow (Mandatory)
-- **Active Development Branch (`dev`):** From now on, all code edits, bug fixes, UI enhancements, and experimental work must occur on the `dev` branch. Never commit unverified changes directly to `main`.
-- **Release Verification & Merge to `main`:** Only merge `dev` into `main` after verifying:
-  1. `cargo check` compiles with 0 errors.
-  2. Local testing via `cargo tauri dev` or running the release binary confirms all UI/IPC features work.
-  3. Packaging test (`cargo tauri build --bundles rpm`) succeeds cleanly.
-- **Push Policy:** Push `dev` or `main` to remote origin only when explicitly requested by the user.
+The repository strictly enforces a three-stage branch promotion pipeline:
+```
+dev  ──(feature / fix)──>  test  ──(successful verification)──>  main (release)
+```
+
+1. **Development Branch (`dev`):**
+   - All code edits, UI refinements, IPC command updates, and bug fixes begin on `dev`.
+   - Never commit raw or untested code directly to `test` or `main`.
+2. **Testing & QA Branch (`test`):**
+   - When a set of changes on `dev` is ready for validation, merge `dev` into `test`.
+   - Execute the **Pre-Release Testing Protocol** (Section 6) on the `test` branch.
+   - If bugs are discovered during testing, fix them on `dev` and promote back to `test`.
+3. **Production Release Branch (`main`):**
+   - Merged **only** from `test` after all three validation stages succeed cleanly.
+   - Pushed to `origin/main` for tagging and publishing releases.
+- **Push Policy:** Push `dev`, `test`, or `main` to remote origin only when explicitly requested by the user.
 
 ---
 
