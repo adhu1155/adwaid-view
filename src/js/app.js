@@ -473,11 +473,19 @@ export async function openFileAction() {
     if (!selected) return;
 
     const paths = Array.isArray(selected) ? selected : [selected];
+    const hadSingleUntouchedTab =
+      state.docs.length === 1 &&
+      !state.docs[0].filePath &&
+      !state.docs[0].dirty &&
+      state.docs[0].content === '# untitled-1\n\n';
+
+    let openedAny = false;
     for (const item of paths) {
       if (typeof item === 'string') {
         const existing = state.docs.find((d) => d.filePath === item);
         if (existing) {
           state.activeId = existing.id;
+          openedAny = true;
           continue;
         }
         const filePayload = await readMarkdownFile(item);
@@ -491,6 +499,7 @@ export async function openFileAction() {
           content: filePayload.content
         });
         state.activeId = id;
+        openedAny = true;
       } else if (item instanceof File) {
         // Browser fallback
         const content = await item.text();
@@ -498,16 +507,25 @@ export async function openFileAction() {
         state.docs.push({
           id,
           title: item.name,
-          filePath: null,
+          filePath: item.path || null,
           mtime: 0,
           dirty: false,
           content
         });
         state.activeId = id;
+        openedAny = true;
       }
     }
+
+    if (hadSingleUntouchedTab && openedAny && state.docs.length > 1) {
+      state.docs.shift();
+    }
+
     renderTabs();
     syncActiveDocumentUI();
+    if (openedAny) {
+      setMode('preview');
+    }
     showToast('File(s) opened');
   } catch (err) {
     console.error('Open file error:', err);
@@ -763,6 +781,78 @@ window.addEventListener('focus', async () => {
   }
 });
 
+// Window Drag & Drop for opening Markdown files from desktop
+window.addEventListener('dragover', (e) => {
+  if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('drop', async (e) => {
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    if (e.target.closest('.tab-item')) return; // tab reordering handled separately
+    e.preventDefault();
+
+    const hadSingleUntouchedTab =
+      state.docs.length === 1 &&
+      !state.docs[0].filePath &&
+      !state.docs[0].dirty &&
+      state.docs[0].content === '# untitled-1\n\n';
+
+    let openedAny = false;
+    for (const file of e.dataTransfer.files) {
+      if (file.path) {
+        const existing = state.docs.find((d) => d.filePath === file.path);
+        if (existing) {
+          state.activeId = existing.id;
+          openedAny = true;
+          continue;
+        }
+        try {
+          const filePayload = await readMarkdownFile(file.path);
+          const id = 'doc-' + Date.now() + Math.random().toString(36).substring(2, 6);
+          state.docs.push({
+            id,
+            title: filePayload.title,
+            filePath: filePayload.path,
+            mtime: filePayload.mtime || 0,
+            dirty: false,
+            content: filePayload.content
+          });
+          state.activeId = id;
+          openedAny = true;
+        } catch (err) {
+          console.error(`Failed to read dropped file ${file.path}:`, err);
+        }
+      } else {
+        const content = await file.text();
+        const id = 'doc-' + Date.now();
+        state.docs.push({
+          id,
+          title: file.name,
+          filePath: null,
+          mtime: 0,
+          dirty: false,
+          content
+        });
+        state.activeId = id;
+        openedAny = true;
+      }
+    }
+
+    if (hadSingleUntouchedTab && openedAny && state.docs.length > 1) {
+      state.docs.shift();
+    }
+
+    if (openedAny) {
+      renderTabs();
+      syncActiveDocumentUI();
+      setMode('preview');
+      showToast('File(s) opened');
+    }
+  }
+});
+
 // =============================================================================
 // 9. INITIALIZATION & CLI ARGS INSPECTION
 // =============================================================================
@@ -788,6 +878,7 @@ async function init() {
 
   // Check CLI arguments for files passed on startup
   const cliArgs = await getCliFileArgs();
+  let openedFromCli = false;
   if (cliArgs && cliArgs.length > 0) {
     state.docs = [];
     for (const filePath of cliArgs) {
@@ -801,6 +892,7 @@ async function init() {
           dirty: false,
           content: filePayload.content
         });
+        openedFromCli = true;
       } catch (err) {
         console.error(`Failed to open CLI file ${filePath}:`, err);
       }
@@ -814,7 +906,11 @@ async function init() {
 
   renderTabs();
   syncActiveDocumentUI();
-  setMode('edit');
+  if (openedFromCli) {
+    setMode('preview');
+  } else {
+    setMode('edit');
+  }
 }
 
 init();
