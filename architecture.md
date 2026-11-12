@@ -146,6 +146,9 @@ The frontend communicates with Linux disk storage exclusively through typed Taur
 | `write_markdown_file` | `path: String, content: String` | `Result<u64, String>` | Atomically writes UTF-8 Markdown content to `path` and returns new mtime. |
 | `rename_markdown_file` | `old_path: String, new_name: String` | `Result<String, String>` | Renames file on disk in the same parent directory and returns the new path. |
 | `get_file_mtime` | `path: String` | `Result<u64, String>` | Returns file last modified timestamp in UNIX epoch seconds. |
+| `minimize_window` | *(none)* | `()` | Minimizes the native application window. |
+| `toggle_maximize_window` | *(none)* | `()` | Toggles native window maximize / restore state. |
+| `close_window` | *(none)* | `()` | Closes the native application window. |
 | `get_cli_file_args` | *(none)* | `Vec<String>` | Returns any `.md` file paths passed when launching `adwaid-view` from terminal. |
 
 ### 6.2 Rust Payload Structs

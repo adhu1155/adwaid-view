@@ -49,14 +49,33 @@ When running in this repository for the **first time** (before the Tauri project
 
 ---
 
-## 5. Self-Maintenance Rule (Keep Docs Updated)
-Whenever you modify the project structure, add or change Tauri IPC commands, alter keyboard shortcuts, or adjust build/packaging steps:
-1. **Update `architecture.md`** so the technical specification matches the actual codebase.
-2. **Update `GEMINI.md`** (especially Section 6 below) so future sessions have accurate workspace state, build commands, and conventions.
+## 5. Branching Strategy & Git Workflow (Mandatory)
+- **Active Development Branch (`dev`):** From now on, all code edits, bug fixes, UI enhancements, and experimental work must occur on the `dev` branch. Never commit unverified changes directly to `main`.
+- **Release Verification & Merge to `main`:** Only merge `dev` into `main` after verifying:
+  1. `cargo check` compiles with 0 errors.
+  2. Local testing via `cargo tauri dev` or running the release binary confirms all UI/IPC features work.
+  3. Packaging test (`cargo tauri build --bundles rpm`) succeeds cleanly.
+- **Push Policy:** Push `dev` or `main` to remote origin only when explicitly requested by the user.
 
 ---
 
-## 6. Current Repository State
+## 6. Pre-Release Testing Protocol
+Before publishing any new version or package:
+1. **Live Development Run:** Run `cargo tauri dev` to launch the live WebKitGTK desktop window and verify window controls (minimize, maximize, close), tab lifecycle, mode switching, and editor input.
+2. **Standalone Binary Test:** Build with `cargo tauri build` and execute `./src-tauri/target/release/adwaid-view` directly in a terminal to confirm release optimizations don't break GTK/Wayland windowing.
+3. **Local Package Test:** Build the RPM via `cargo tauri build --bundles rpm` and install locally with `sudo dnf reinstall ./src-tauri/target/release/bundle/rpm/*.rpm` to confirm desktop menu integration and MIME associations.
+
+---
+
+## 7. Self-Maintenance Rule (Keep Docs Updated)
+Whenever you modify the project structure, add or change Tauri IPC commands, alter keyboard shortcuts, or adjust build/packaging steps:
+1. **Update `architecture.md`** so the technical specification matches the actual codebase.
+2. **Update `GEMINI.md`** (especially Section 8 below) so future sessions have accurate workspace state, build commands, and conventions.
+
+---
+
+## 8. Current Repository State
+- **Active Git Branch:** `dev`
 - **Bootstrap Status:** `COMPLETED` (Initial harness executed: directory tree, offline vendored assets, ported UI prototype, Tauri v2 backend, frameless windowing, and permissions configured).
 - **Core Features Status:** `COMPLETED`
   - Unsaved changes confirmation guard on tab/window close.

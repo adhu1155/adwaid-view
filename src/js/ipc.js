@@ -115,19 +115,13 @@ export async function saveFileDialog(defaultName = 'untitled.md') {
  * Window Controls for frameless window
  */
 export async function minimizeWindow() {
-  if (window.__TAURI__?.window?.getCurrentWindow) {
-    return await window.__TAURI__.window.getCurrentWindow().minimize();
-  }
+  return await invoke('minimize_window');
 }
 
 export async function toggleMaximizeWindow() {
-  if (window.__TAURI__?.window?.getCurrentWindow) {
-    return await window.__TAURI__.window.getCurrentWindow().toggleMaximize();
-  }
+  return await invoke('toggle_maximize_window');
 }
 
 export async function closeWindow() {
-  if (window.__TAURI__?.window?.getCurrentWindow) {
-    return await window.__TAURI__.window.getCurrentWindow().close();
-  }
+  return await invoke('close_window');
 }

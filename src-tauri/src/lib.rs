@@ -75,6 +75,27 @@ fn get_file_mtime(path: String) -> Result<u64, String> {
 }
 
 #[tauri::command]
+fn minimize_window(window: tauri::Window) {
+    let _ = window.minimize();
+}
+
+#[tauri::command]
+fn toggle_maximize_window(window: tauri::Window) {
+    if let Ok(is_max) = window.is_maximized() {
+        if is_max {
+            let _ = window.unmaximize();
+        } else {
+            let _ = window.maximize();
+        }
+    }
+}
+
+#[tauri::command]
+fn close_window(window: tauri::Window) {
+    let _ = window.close();
+}
+
+#[tauri::command]
 fn get_cli_file_args() -> Vec<String> {
     let mut files = Vec::new();
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -102,6 +123,9 @@ pub fn run() {
             write_markdown_file,
             rename_markdown_file,
             get_file_mtime,
+            minimize_window,
+            toggle_maximize_window,
+            close_window,
             get_cli_file_args
         ])
         .run(tauri::generate_context!())
