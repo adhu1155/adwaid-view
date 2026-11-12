@@ -72,6 +72,9 @@ Whenever you modify the project structure, add or change Tauri IPC commands, alt
   - Fedora 45 system libraries (`webkit2gtk4.1-devel`, `librsvg2-devel`, `libappindicator-gtk3-devel`, `@development-tools`) **installed and verified**.
   - `cargo check --manifest-path src-tauri/Cargo.toml` compiled cleanly with zero errors.
   - `cargo tauri build --bundles rpm` verified: generated `adwaid-view-0.1.0-1.x86_64.rpm` (3.61 MiB).
+- **Distribution & Release Status:**
+  - Initial release `v0.1.0` published on GitHub: `https://github.com/adhu1155/adwaid-view/releases/tag/v0.1.0`.
+  - Automated release workflow configured: `.github/workflows/release.yml` (triggers on `v*` tag pushes).
 - **Verified Build Commands:**
   - Development run: `cargo tauri dev`
   - Release binary & RPM package: `cargo tauri build --bundles rpm`

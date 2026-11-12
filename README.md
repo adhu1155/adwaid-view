@@ -8,6 +8,18 @@
 
 ---
 
+## Quick Install (Fedora Linux)
+
+No git or code compilation required! Install the latest release directly via `dnf`:
+
+```bash
+sudo dnf install https://github.com/adhu1155/adwaid-view/releases/download/v0.1.0/adwaid-view-0.1.0-1.x86_64.rpm
+```
+
+Or download the pre-compiled `.rpm` installer or standalone `.tar.gz` from the [Latest Release page](https://github.com/adhu1155/adwaid-view/releases/tag/v0.1.0).
+
+---
+
 ## Highlights & Features
 
 - **No Left Sidebar:** Zero file trees, outline panels, or activity bars. Your writing takes 100% of the canvas.
