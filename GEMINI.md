@@ -38,6 +38,7 @@ When running in this repository for the **first time** (before the Tauri project
   1. `32px` Title Bar (`adwaid-view` title, active file name, Light/Dark toggle, custom Minimize/Maximize/Close buttons with `data-tauri-drag-region`).
   2. `38px` Menu Bar (`File` dropdown, `New` button, `Mode` dropdown displaying active mode inside the button itself — **do not** add extra mode pills next to the menu tools — plus right-aligned cursor stats, word count, and save status).
   3. `36px` Browser-Style Tab Strip (connected active tab, unsaved dot, double-click inline rename, close `×`, and `+` button).
+- **Default View Mode:** When opening an existing Markdown file (via CLI arguments, the `File -> Open` dialog, or desktop MIME handler), the view must default to **Preview** mode (`read`) rather than raw `edit` mode. New untitled blank tabs created via `New` or `Ctrl+N` switch to `Edit` mode.
 - **Scope Discipline:** Do not introduce unrequested features (e.g., cloud sync, AI chat panels, WYSIWYG rich-text toolbars, plugin marketplaces, or multi-window session managers) unless explicitly requested by the user.
 
 ---
