@@ -96,6 +96,7 @@ Whenever you modify the project structure, add or change Tauri IPC commands, alt
   - Custom branding and icons generated from `adwaid_view_icon.svg` into `src/assets/logo.svg` and `src-tauri/icons/`.
   - Linux desktop entry `adwaid-view.desktop` with Markdown MIME associations.
   - Default view mode set to Preview when opening existing files; Edit mode active for new blank drafts.
+  - Licensing: Source-available under the PolyForm Noncommercial License 1.0.0 (Copyright Adwaid Raveendran). RPM packages and standalone tarballs embed LICENSE.
 - **Toolchain Status:**
   - `rustc 1.94.1`, `cargo 1.94.1` linked into `~/.local/bin/`.
   - `cargo-tauri 2.12.4` installed into `~/.local/bin/cargo-tauri`.
