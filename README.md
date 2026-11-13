@@ -80,7 +80,6 @@ Download **`adwaid-view-v0.1.0-x86_64.tar.gz`** from [Releases](https://github.c
 | **`Ctrl + S`** | Save active document |
 | **`Ctrl + Shift + S`** | Save As new file |
 | **`Ctrl + E`** | Cycle view (`Preview` → `Edit` → `Split`) |
-| **`Ctrl + P`** | Export / Print document as PDF |
 | **`Ctrl + W`** | Close tab |
 | **`Ctrl + Tab`** | Next tab |
 | **`F2`** | Rename active tab inline |

@@ -533,13 +533,6 @@ export async function openFileAction() {
   }
 }
 
-export function exportPdfAction() {
-  const doc = getActiveDoc();
-  if (!doc) return;
-  renderMarkdown(previewEl, doc.content);
-  window.print();
-}
-
 export async function saveFileAction(forceSaveAs = false) {
   const doc = getActiveDoc();
   if (!doc) return;
@@ -663,11 +656,6 @@ document.getElementById('menu-rename-file')?.addEventListener('click', () => {
   renderTabs();
 });
 
-document.getElementById('menu-export-pdf')?.addEventListener('click', () => {
-  closeAllDropdowns();
-  exportPdfAction();
-});
-
 document.getElementById('menu-close-tab')?.addEventListener('click', () => {
   closeAllDropdowns();
   closeTab(state.activeId);
@@ -747,9 +735,6 @@ window.addEventListener('keydown', (e) => {
   } else if (mod && e.key.toLowerCase() === 'e') {
     e.preventDefault();
     cycleMode();
-  } else if (mod && e.key.toLowerCase() === 'p') {
-    e.preventDefault();
-    exportPdfAction();
   } else if (mod && e.key.toLowerCase() === 'w') {
     e.preventDefault();
     closeTab(state.activeId);
