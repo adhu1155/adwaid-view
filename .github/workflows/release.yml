@@ -50,7 +50,8 @@ jobs:
 
       - name: Package Standalone Tarball
         run: |
-          tar -czf adwaid-view-${{ github.ref_name }}-linux-x86_64.tar.gz -C src-tauri/target/release adwaid-view
+          cp LICENSE src-tauri/target/release/LICENSE
+          tar -czf adwaid-view-${{ github.ref_name }}-linux-x86_64.tar.gz -C src-tauri/target/release adwaid-view LICENSE
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2

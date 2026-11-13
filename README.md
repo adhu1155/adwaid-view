@@ -6,7 +6,7 @@
   [![Latest Release](https://img.shields.io/github/v/release/adhu1155/adwaid-view?color=blue&label=Release&logo=github)](https://github.com/adhu1155/adwaid-view/releases/latest)
   [![Platform](https://img.shields.io/badge/Platform-Linux%20(Wayland%20%26%20X11)-informational?logo=linux)](https://github.com/adhu1155/adwaid-view/releases/latest)
   [![Memory Footprint](https://img.shields.io/badge/Memory-~35%20MB%20RAM-brightgreen)](https://github.com/adhu1155/adwaid-view)
-  [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+  [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
 </div>
 
 ---
@@ -101,4 +101,13 @@ adwaid-view notes.md architecture.md
 
 Found a bug, have an idea, or want to contribute?
 - **Issues & Suggestions:** [Open an Issue](https://github.com/adhu1155/adwaid-view/issues)
-- **License:** Open source under the [MIT License](LICENSE).
+
+### License
+
+adwaid-view is source-available under the PolyForm Noncommercial License 1.0.0.
+
+You are welcome to use, modify and share the application and derivative works for permitted noncommercial purposes, subject to the license terms.
+
+Commercial use is not permitted under this license. Separate written permission from the copyright holder is required for commercial licensing.
+
+See [LICENSE](LICENSE) for the complete terms.

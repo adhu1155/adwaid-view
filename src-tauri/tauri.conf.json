@@ -26,9 +26,19 @@
   },
   "bundle": {
     "active": true,
+    "license": "PolyForm-Noncommercial-1.0.0",
+    "licenseFile": "../LICENSE",
     "targets": [
       "rpm"
     ],
+    "linux": {
+      "rpm": {
+        "files": {
+          "/usr/share/licenses/adwaid-view/LICENSE": "../LICENSE",
+          "/usr/share/doc/adwaid-view/LICENSE": "../LICENSE"
+        }
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

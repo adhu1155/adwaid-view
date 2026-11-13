@@ -2,6 +2,7 @@
   "name": "adwaid-view",
   "version": "0.1.0",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "description": "Distraction-free Linux desktop Markdown editor and viewer for Fedora 45",
   "type": "module",
   "scripts": {
