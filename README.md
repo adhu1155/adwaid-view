@@ -13,25 +13,17 @@
 
 ## The Story Behind adwaid-view
 
-Markdown quietly became my default language for thought.
+A lot of my work happens in Markdown files. Project notes, documentation, ideas, things I want to remember. Over time, I found myself opening `.md` files more often than almost anything else.
 
-Not because anyone told me to, but because plain text just *works*. No proprietary formatting containers, no rigid word processors, no files that render unpredictably on someone else's machine. Over time, `.md` files became the home where I draft ideas, keep project notes, document systems, and think out loud.
+At some point, I wanted a simple Linux app to read and edit them. I tried a few, but nothing quite felt right. Some offered far more than I needed, while others made the simplest thing, reading a document, feel like an afterthought.
 
-Yet finding the right Linux tool to read and write those files was surprisingly frustrating.
+So I decided to build one myself.
 
-On one side were the heavyweights — apps packed with complex sidebar trees, endless plugin settings, graph views, and background sync engines. Impressive pieces of software, but opening them just to read a document or capture a thought felt overwhelming. The tool quickly got in the way of the writing.
+That's how **adwaid-view** came to life. I wanted a comfortable, full-width reading experience, a simple editor, browser-style tabs and the freedom to switch between Preview, Edit and Split modes without getting lost in menus or settings.
 
-On the other side were bare-bones minimalist viewers. While lightweight, their interfaces often felt like an afterthought: clunky navigation, strained typography, or cramped narrow columns that suffocated wide tables and code blocks.
+No accounts, no cloud dependencies, no unnecessary complexity. Just a little application built around something I use every day.
 
-I didn't want an all-in-one workspace suite, nor did I want a crude text box. I wanted something that felt *just right*:
-- A **full-width canvas** that gives 100% of your screen to your words, tables, and diagrams.
-- A **reading view by default** when opening existing documents, with instant switching to edit or synchronized split view.
-- Clean **browser-style tabs** to manage open documents without navigating complex project directories.
-- A native desktop citizen built specifically for Linux that opens instantly and stays out of the way.
-
-So I built **adwaid-view** — an editor and viewer crafted just the way I wanted it to be.
-
-If that sounds like what you've been looking for, give it a spin, make it yours, and share your thoughts.
+**Use Markdown on Linux? Give adwaid-view a try!** Check out the project on [GitHub](https://github.com/adhu1155/adwaid-view), explore it, and let me know what you think. Suggestions, feedback and contributions are always welcome. I'd love to make this better with the community.
 
 ---
 
