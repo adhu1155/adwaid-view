@@ -78,14 +78,19 @@ Strictly abiding by the **no-left-sidebar, full-width canvas, 3-tier chrome** pr
   - Persists chosen zoom level across sessions in `localStorage`.
 - **Files to touch:** `src/styles/main.css`, `src/js/app.js`.
 
-### Feature 4: Standalone HTML Export (`File -> Export as HTML`)
-- **UI:** Added under `File` dropdown (`File -> Export as HTML...`).
+### Feature 4: Standalone HTML & PDF Export (`File -> Export as HTML / PDF`)
+- **UI:** Added under `File` dropdown (`Export as HTML...`, `Export as PDF...` / `Ctrl + P`).
 - **Functionality:**
-  - Renders active tab's Markdown into clean, self-contained HTML embedding the active Light or Dark theme styling.
-  - Prompts file save dialog (`export.html`) and writes out a file that can be opened in any web browser without dependencies.
-- **Files to touch:** `src/js/app.js`, `src/js/ipc.js`.
+  - **HTML Export:** Renders active tab's Markdown into clean, self-contained HTML embedding the active Light or Dark theme styling. Prompts file save dialog (`export.html`).
+  - **PDF Export:** Configures print styles (`@media print`) and triggers native Linux print-to-PDF dialog for clean, high-resolution paginated output without UI chrome.
+- **Files to touch:** `src/index.html`, `src/styles/main.css`, `src/js/app.js`, `src/js/ipc.js`.
 
-### Feature 5: Markdown Cheat Sheet / Help Modal (`F1`)
+### Feature 5: Performance Polish — High-Performance Split-Screen Scroll Synchronization
+- **Issue:** Mouse scroll wheel rolling in split-screen mode exhibited stutter/lag due to bidirectional event feedback and layout thrashing.
+- **Fix:** Implement hover-driven active pane latching (`mouseenter` / `touchstart`), passive scroll listeners (`{ passive: true }`), and `requestAnimationFrame` debouncing to decouple layout measurement from wheel ticks.
+- **Files to touch:** `src/js/renderer.js`.
+
+### Feature 6: Markdown Cheat Sheet / Help Modal (`F1`)
 - **UI:** A quick, cleanly styled in-app cheat sheet modal showing common Markdown shortcuts (tables, headers, bold, links, code blocks, task lists).
 - **Files to touch:** `src/index.html`, `src/styles/main.css`, `src/js/app.js`.
 

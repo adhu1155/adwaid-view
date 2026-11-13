@@ -76,34 +76,55 @@ export function setupSplitResizer({ workspaceEl, editorPaneEl, previewPaneEl, re
  * @param {() => boolean} options.isSplitMode
  */
 export function setupScrollSync({ editorEl, previewEl, isSplitMode }) {
-  let isSyncingEditor = false;
-  let isSyncingPreview = false;
+  let activePane = null; // 'editor' | 'preview'
+  let editorRaf = null;
+  let previewRaf = null;
 
-  editorEl.addEventListener('scroll', () => {
-    if (!isSplitMode() || isSyncingEditor) return;
-    isSyncingPreview = true;
-    const editorScrollable = editorEl.scrollHeight - editorEl.clientHeight;
-    if (editorScrollable > 0) {
-      const ratio = editorEl.scrollTop / editorScrollable;
-      const previewScrollable = previewEl.scrollHeight - previewEl.clientHeight;
-      previewEl.scrollTop = ratio * previewScrollable;
-    }
-    requestAnimationFrame(() => {
-      isSyncingPreview = false;
-    });
-  });
+  // Latch the active pane on pointer/wheel interaction to prevent feedback loops
+  editorEl.addEventListener('mouseenter', () => { activePane = 'editor'; }, { passive: true });
+  editorEl.addEventListener('mousemove', () => { activePane = 'editor'; }, { passive: true });
+  editorEl.addEventListener('focus', () => { activePane = 'editor'; }, { passive: true });
+  editorEl.addEventListener('touchstart', () => { activePane = 'editor'; }, { passive: true });
 
-  previewEl.addEventListener('scroll', () => {
-    if (!isSplitMode() || isSyncingPreview) return;
-    isSyncingEditor = true;
-    const previewScrollable = previewEl.scrollHeight - previewEl.clientHeight;
-    if (previewScrollable > 0) {
-      const ratio = previewEl.scrollTop / previewScrollable;
-      const editorScrollable = editorEl.scrollHeight - editorEl.clientHeight;
-      editorEl.scrollTop = ratio * editorScrollable;
-    }
-    requestAnimationFrame(() => {
-      isSyncingEditor = false;
-    });
-  });
+  previewEl.addEventListener('mouseenter', () => { activePane = 'preview'; }, { passive: true });
+  previewEl.addEventListener('mousemove', () => { activePane = 'preview'; }, { passive: true });
+  previewEl.addEventListener('touchstart', () => { activePane = 'preview'; }, { passive: true });
+
+  editorEl.addEventListener(
+    'scroll',
+    () => {
+      if (!isSplitMode()) return;
+      if (activePane && activePane !== 'editor') return;
+
+      if (editorRaf) cancelAnimationFrame(editorRaf);
+      editorRaf = requestAnimationFrame(() => {
+        const editorScrollable = editorEl.scrollHeight - editorEl.clientHeight;
+        if (editorScrollable > 0) {
+          const ratio = editorEl.scrollTop / editorScrollable;
+          const previewScrollable = previewEl.scrollHeight - previewEl.clientHeight;
+          previewEl.scrollTop = ratio * previewScrollable;
+        }
+      });
+    },
+    { passive: true }
+  );
+
+  previewEl.addEventListener(
+    'scroll',
+    () => {
+      if (!isSplitMode()) return;
+      if (activePane && activePane !== 'preview') return;
+
+      if (previewRaf) cancelAnimationFrame(previewRaf);
+      previewRaf = requestAnimationFrame(() => {
+        const previewScrollable = previewEl.scrollHeight - previewEl.clientHeight;
+        if (previewScrollable > 0) {
+          const ratio = previewEl.scrollTop / previewScrollable;
+          const editorScrollable = editorEl.scrollHeight - editorEl.clientHeight;
+          editorEl.scrollTop = ratio * editorScrollable;
+        }
+      });
+    },
+    { passive: true }
+  );
 }
