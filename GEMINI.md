@@ -50,23 +50,40 @@ When running in this repository for the **first time** (before the Tauri project
 
 ---
 
-## 5. Branching Strategy & Git Workflow (Mandatory)
-The repository strictly enforces a three-stage branch promotion pipeline:
+## 5. Branching Strategy & Mandatory Issue Workflow
+The repository strictly enforces a mandatory issue-driven, three-stage promotion pipeline:
 ```
-dev  ──(feature / fix)──>  test  ──(successful verification)──>  main (release)
+Issue Creation (GitHub) ──> dev (implementation) ──> test (validation & user QA) ──> main (release)
 ```
 
-1. **Development Branch (`dev`):**
-   - All code edits, UI refinements, IPC command updates, and bug fixes begin on `dev`.
-   - Never commit raw or untested code directly to `test` or `main`.
-2. **Testing & QA Branch (`test`):**
-   - When a set of changes on `dev` is ready for validation, merge `dev` into `test`.
-   - Execute the **Pre-Release Testing Protocol** (Section 6) on the `test` branch.
-   - If bugs are discovered during testing, fix them on `dev` and promote back to `test`.
-3. **Production Release Branch (`main`):**
-   - Merged **only** from `test` after all three validation stages succeed cleanly.
-   - Pushed to `origin/main` for tagging and publishing releases.
-- **Push Policy:** Push `dev`, `test`, or `main` to remote origin only when explicitly requested by the user.
+### Strict Workflow Rules (Zero Exceptions)
+1. **Issue First (Mandatory):**
+   - **Never start working on any feature, bug fix, or refactor without creating a GitHub issue first.**
+   - Every issue must contain:
+     - Clear problem statement / context.
+     - Detailed feature / bug description (UI chrome, architecture, files to touch).
+     - Concrete Acceptance Criteria (checkboxes).
+     - Rigorous Definition of Done (DoD).
+   - Assign the issue to `@me` (`adhu1155`).
+   - Use the `start-issue` skill to scaffold and register the issue.
+2. **Development on `dev`:**
+   - All code implementation, refactoring, and IPC updates occur exclusively on `dev`.
+   - Never commit raw, incomplete, or untested code directly to `test` or `main`.
+3. **Testing on `test` & User Hands-On Verification:**
+   - Once development is complete on `dev`, merge `dev` into `test`.
+   - Run compilation and validation checks (`verify-test` skill).
+   - **CRITICAL:** Changes merged to `test` must be verified by the USER personally (hands-on test).
+   - If issues or friction are found during user testing, fix them on `dev` and promote back to `test`.
+4. **Promotion to `main` (Only with Explicit User Approval):**
+   - Merged **only** from `test` into `main` after the user has tested and explicitly confirmed: *"it's working fine"*.
+   - Use the `pr-review` skill to close the issue, update documentation, and perform final promotion.
+5. **Push Policy:**
+   - Push `dev`, `test`, or `main` to remote origin **only when explicitly requested by the user**.
+
+### Specialized Project Skills
+- **`start-issue`:** Creates fully structured GitHub issues before any code is touched.
+- **`verify-test`:** Handles `dev` ➔ `test` promotion, automated compilation checks, and prepares user testing instructions.
+- **`pr-review`:** Executes final checklist, verifies user sign-off, updates living docs, merges to `main`, and closes the issue.
 
 ---
 
